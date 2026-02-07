@@ -21,26 +21,23 @@ import reto_psp.servidor.model.Game;
 
 @Service
 public class SpringService {
+	private List<Game> games = new ArrayList<>();
 	public static final Path ROOT = Paths.get("../shared-files/server-files");
-
 	public final Path APK_DIR = Paths.get("../shared-files/server-files/apks");
-
 	public final Path IMAGE_DIR = Paths.get("../shared-files/server-files/images");
 
 	@PostConstruct
 	public void init() throws IOException {
 		Files.createDirectories(APK_DIR);
 		Files.createDirectories(IMAGE_DIR);
+		games=generateList();
 	}
 
 	public List<Game> getAllGames() {
-		List<Game> games = generateList();
 		return games;
 	}
 
 	public Game getGameId(Long id) {
-		List<Game> games = generateList();
-
 		for (Game game : games) {
 			if (game.getId() == id) {
 				return game;
@@ -66,7 +63,6 @@ public class SpringService {
 	}
 
 	public boolean deleteGameId(Long id) {
-		List<Game> games = generateList();
 		boolean removed = games.removeIf(game -> game.getId().equals(id));
 
 		if (removed) {
@@ -77,8 +73,6 @@ public class SpringService {
 	}
 
 	public Game createGame(Game newGame) {
-		List<Game> games = generateList();
-
 		if (newGame.getId() == null) {
 			newGame.setId(Long.valueOf(games.size() + 1));
 		}
@@ -89,8 +83,6 @@ public class SpringService {
 	}
 
 	public Game modifyGame(Game modifiedGame) {
-		List<Game> games = generateList();
-
 		for (Game game : games) {
 			if (game.getId() == modifiedGame.getId()) {
 				games.remove(games.indexOf(game));
