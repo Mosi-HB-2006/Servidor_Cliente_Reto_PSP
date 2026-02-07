@@ -1,0 +1,71 @@
+# =========================
+# Maven
+# =========================
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+.mvn/timing.properties
+
+# =========================
+# Spring Boot
+# =========================
+*.log
+spring.log
+
+# Profile-specific configs (avoid committing secrets)
+application-*.yml
+application-*.properties
+
+# =========================
+# Eclipse / Spring Tool Suite
+# =========================
+.classpath
+.project
+.settings/
+.springBeans
+.factorypath
+
+# =========================
+# IntelliJ (in case someone opens it there)
+# =========================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# =========================
+# NetBeans (just in case)
+# =========================
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+.nb-gradle/
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+
+# =========================
+# Java
+# =========================
+*.class
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Environment / secrets
+# =========================
+.env
+.env.*
+*.key
+*.pem
+.metadata
+com/src/main/resources/apks

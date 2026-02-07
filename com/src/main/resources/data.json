@@ -1,0 +1,29 @@
+[ {
+  "id" : 2,
+  "title" : "Honor Health",
+  "imagePath" : "images/honorHealth.png",
+  "apkPath" : "apks/honorHealth.apk",
+  "videoLink" : "https://www.youtube.com/watch?v=zrV1i742BP4",
+  "description" : "The HONOR Health app is a comprehensive fitness and wellness platform designed to track workouts, monitor health metrics, and manage supported wearable devices like the HONOR Watch GS3, Band 7, and Watch 4."
+}, {
+  "id" : 3,
+  "title" : "Huawei Health",
+  "imagePath" : "images/huaweiHealth.png",
+  "apkPath" : "apks/huaweiHealth.apk",
+  "videoLink" : "https://youtu.be/XOTtscSJTjY?si=wE-gCRSTiYBE0R_4",
+  "description" : "The Huawei Health app is an integrated health and fitness companion that tracks over 100 sports, monitors health metrics like heart rate, sleep, and blood oxygen, and manages Huawei wearable devices (watches/bands)."
+}, {
+  "id" : 4,
+  "title" : "Spruce Health",
+  "imagePath" : "images/spruceHealth.jpg",
+  "apkPath" : "apks/spruceHealth.apk",
+  "videoLink" : "https://youtu.be/3l-BRKz6TNw?si=y0RPqLVWVx0-DYaF",
+  "description" : "Spruce is a comprehensive, HIPAA-compliant communication platform designed for healthcare professionals to securely connect with patients via phone, text, fax, and video."
+}, {
+  "id" : 1,
+  "title" : "Evidation Health",
+  "imagePath" : "images/evidationHealth.png",
+  "apkPath" : "apks/evidationHealth.apk",
+  "videoLink" : "https://www.youtube.com/watch?v=OBnohZpXKhc",
+  "description" : "Evidation Health sought to understand everyday behaviors that create better health outcomes by running digital studies using “invisible” data—data collected passively in everyday life from devices like smartphones and wearable sensors."
+} ]
