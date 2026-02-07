@@ -1,4 +1,11 @@
 [ {
+  "id" : 1,
+  "title" : "Evidation Health",
+  "imagePath" : "images/evidationHealth.png",
+  "apkPath" : "apks/evidationHealth.apk",
+  "videoLink" : "https://www.youtube.com/watch?v=OBnohZpXKhc",
+  "description" : "Evidation Health sought to understand everyday behaviors that create better health outcomes by running digital studies using “invisible” data—data collected passively in everyday life from devices like smartphones and wearable sensors."
+}, {
   "id" : 2,
   "title" : "Honor Health",
   "imagePath" : "images/honorHealth.png",
@@ -19,11 +26,4 @@
   "apkPath" : "apks/spruceHealth.apk",
   "videoLink" : "https://youtu.be/3l-BRKz6TNw?si=y0RPqLVWVx0-DYaF",
   "description" : "Spruce is a comprehensive, HIPAA-compliant communication platform designed for healthcare professionals to securely connect with patients via phone, text, fax, and video."
-}, {
-  "id" : 1,
-  "title" : "Evidation Health",
-  "imagePath" : "images/evidationHealth.png",
-  "apkPath" : "apks/evidationHealth.apk",
-  "videoLink" : "https://www.youtube.com/watch?v=OBnohZpXKhc",
-  "description" : "Evidation Health sought to understand everyday behaviors that create better health outcomes by running digital studies using “invisible” data—data collected passively in everyday life from devices like smartphones and wearable sensors."
 } ]

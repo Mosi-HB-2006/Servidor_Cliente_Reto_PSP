@@ -3,6 +3,7 @@ package reto_psp.servidor.service;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -15,10 +16,23 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.PostConstruct;
 import reto_psp.servidor.model.Game;
 
 @Service
 public class SpringService {
+	public static final Path ROOT = Paths.get("../shared-files/server-files");
+
+	public final Path APK_DIR = Paths.get("../shared-files/server-files/apks");
+
+	public final Path IMAGE_DIR = Paths.get("../shared-files/server-files/images");
+
+	@PostConstruct
+	public void init() throws IOException {
+		Files.createDirectories(APK_DIR);
+		Files.createDirectories(IMAGE_DIR);
+	}
+
 	public List<Game> getAllGames() {
 		List<Game> games = generateList();
 		return games;
@@ -36,28 +50,19 @@ public class SpringService {
 		return null;
 	}
 
-	public byte[] getGameFile(String resourcePath) {
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+	public byte[] getGameFile(String relativePath) {
+		try {
+			Path filePath = ROOT.resolve(relativePath);
 
-			if (is == null) {
-				throw new FileNotFoundException("Resource not found: " + resourcePath);
+			if (!Files.exists(filePath)) {
+				return null;
 			}
 
-			return is.readAllBytes();
+			return Files.readAllBytes(filePath);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	public String hashGame(String filePath) {
-		if (filePath != null) {
-			String fileHash = hashFile(filePath);
-
-			return fileHash;
-		}
-
-		return null;
 	}
 
 	public boolean deleteGameId(Long id) {
@@ -73,6 +78,11 @@ public class SpringService {
 
 	public Game createGame(Game newGame) {
 		List<Game> games = generateList();
+
+		if (newGame.getId() == null) {
+			newGame.setId(Long.valueOf(games.size() + 1));
+		}
+
 		games.add(newGame);
 		writeList(games);
 		return newGame;
@@ -127,55 +137,39 @@ public class SpringService {
 		}
 	}
 
-	public String hashText(String text) {
-		try {
-			MessageDigest md5 = MessageDigest.getInstance("MD5");
-			byte[] hashBytes = md5.digest(text.getBytes());
+	public String hashFile(String relativePath) {
+	    Path filePath = ROOT.resolve(relativePath);
 
-			// Convert the byte array to a hexadecimal representation
-			StringBuilder hexStringBuilder = new StringBuilder();
-			for (byte b : hashBytes) {
-				String hex = String.format("%02X", b);
-				hexStringBuilder.append(hex);
-			}
+	    if (!Files.exists(filePath)) {
+	        System.err.println("File not found: " + filePath);
+	        return null;
+	    }
 
-			return hexStringBuilder.toString();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
+	    try (InputStream is = Files.newInputStream(filePath)) {
+	        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+
+	        byte[] buffer = new byte[8192];
+	        int bytesRead;
+
+	        while ((bytesRead = is.read(buffer)) != -1) {
+	            sha.update(buffer, 0, bytesRead);
+	        }
+
+	        byte[] hashBytes = sha.digest();
+
+	        StringBuilder hexStringBuilder = new StringBuilder();
+	        for (byte b : hashBytes) {
+	            hexStringBuilder.append(String.format("%02X", b));
+	        }
+
+	        return hexStringBuilder.toString();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
 	}
 
-	public String hashFile(String resourcePath) {
-		try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
-
-			if (is == null) {
-				throw new FileNotFoundException("Resource not found: " + resourcePath);
-			}
-
-			MessageDigest sha = MessageDigest.getInstance("SHA-256");
-
-			byte[] buffer = new byte[8192];
-			int bytesRead;
-
-			while ((bytesRead = is.read(buffer)) != -1) {
-				sha.update(buffer, 0, bytesRead);
-			}
-
-			byte[] hashBytes = sha.digest();
-
-			StringBuilder hexStringBuilder = new StringBuilder();
-			for (byte b : hashBytes) {
-				hexStringBuilder.append(String.format("%02X", b));
-			}
-
-			return hexStringBuilder.toString();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
 
 	public String hashBytes(byte[] data) {
 		if (data == null) {

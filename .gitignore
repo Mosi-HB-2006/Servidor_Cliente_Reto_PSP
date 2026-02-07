@@ -70,3 +70,4 @@ Thumbs.db
 .metadata
 com/src/main/resources/apks
 servidor/src/main/resources/apks
+shared-files/server-files

@@ -2,6 +2,9 @@ package reto_psp.cliente;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ public class SwingApplication extends JFrame {
 	private final JButton btnGetAll = new JButton("Get All Games");
 	private final JButton btnGetById = new JButton("Get Game by ID");
 	private final JButton btnGetApk = new JButton("Get Game APK");
+	private final JButton btnGetImage = new JButton("Get Game Image");
 	private final JButton btnGetHash = new JButton("Get Game Hash");
 	private final JButton btnVerifyApk = new JButton("Verify Game APK");
 	private final JButton btnCreate = new JButton("Create Game");
@@ -51,6 +55,7 @@ public class SwingApplication extends JFrame {
 		topPanel.add(btnGetAll);
 		topPanel.add(btnGetById);
 		topPanel.add(btnGetApk);
+		topPanel.add(btnGetImage);
 		topPanel.add(btnGetHash);
 		topPanel.add(btnVerifyApk);
 		topPanel.add(btnCreate);
@@ -68,6 +73,7 @@ public class SwingApplication extends JFrame {
 		btnGetAll.addActionListener(e -> loadAllGames());
 		btnGetById.addActionListener(e -> loadGameById());
 		btnGetApk.addActionListener(e -> loadGameApk());
+		btnGetImage.addActionListener(e -> loadGameImage());
 		btnGetHash.addActionListener(e -> loadGameHash());
 		btnVerifyApk.addActionListener(e -> verifyGameApk());
 		btnCreate.addActionListener(e -> createGame());
@@ -156,7 +162,7 @@ public class SwingApplication extends JFrame {
 					JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-		
+
 		SwingWorker<ResponseEntity<byte[]>, Void> worker = new SwingWorker<>() {
 			@Override
 			protected ResponseEntity<byte[]> doInBackground() {
@@ -177,6 +183,37 @@ public class SwingApplication extends JFrame {
 		worker.execute();
 	}
 
+	private void loadGameImage() {
+		listModel.clear();
+
+		Long id = getIdFromField();
+		if (id == null) {
+			JOptionPane.showMessageDialog(this, "Please enter a valid Game ID", "Invalid input",
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		SwingWorker<ResponseEntity<byte[]>, Void> worker = new SwingWorker<>() {
+			@Override
+			protected ResponseEntity<byte[]> doInBackground() {
+				return client.getGameImage(getIdFromField());
+			}
+
+			@Override
+			protected void done() {
+				try {
+					byte[] apk = get().getBody();
+					JOptionPane.showMessageDialog(SwingApplication.this,
+							"Image recieved: " + (apk != null ? apk.length : 0) + " bytes");
+				} catch (Exception ex) {
+					showError(ex);
+				}
+			}
+		};
+
+		worker.execute();
+	}
+
 	private void loadGameHash() {
 		listModel.clear();
 
@@ -186,7 +223,7 @@ public class SwingApplication extends JFrame {
 					JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-		
+
 		SwingWorker<ResponseEntity<String>, Void> worker = new SwingWorker<>() {
 			@Override
 			protected ResponseEntity<String> doInBackground() {
@@ -215,7 +252,7 @@ public class SwingApplication extends JFrame {
 					JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-		
+
 		SwingWorker<ResponseEntity<Boolean>, Void> worker = new SwingWorker<>() {
 			@Override
 			protected ResponseEntity<Boolean> doInBackground() {
@@ -237,25 +274,40 @@ public class SwingApplication extends JFrame {
 	}
 
 	private void createGame() {
-		SwingWorker<ResponseEntity<Game>, Void> worker = new SwingWorker<>() {
-			@Override
-			protected ResponseEntity<Game> doInBackground() {
-				Game game = new Game();
-				game.setTitle("New game");
-				return client.createGame(game);
-			}
+		GameCreateDialog dialog = new GameCreateDialog(this);
+		dialog.setVisible(true);
 
-			@Override
-			protected void done() {
-				try {
-					Game created = get().getBody();
-					JOptionPane.showMessageDialog(SwingApplication.this, "Game created:\n" + created);
-				} catch (Exception ex) {
-					showError(ex);
+		if (dialog.isSubmitted()) {
+			Game game = dialog.getCreatedGame();
+			File image = dialog.getSelectedImage();
+			File apk = dialog.getSelectedApk();
+
+			SwingWorker<ResponseEntity<Game>, Void> worker = new SwingWorker<>() {
+				@Override
+			    protected ResponseEntity<Game> doInBackground() {
+					
+					try {
+						return client.createGame(game, apk, image);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						System.out.println(e);
+						return ResponseEntity.internalServerError().build();
+					}
+			    }
+
+				@Override
+				protected void done() {
+					try {
+						Game created = get().getBody();
+						JOptionPane.showMessageDialog(SwingApplication.this, "Game created:\n" + created);
+					} catch (Exception ex) {
+						showError(ex);
+					}
 				}
-			}
-		};
-		worker.execute();
+			};
+
+			worker.execute();
+		}
 	}
 
 	private void modifyGame() {
@@ -290,7 +342,7 @@ public class SwingApplication extends JFrame {
 					JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-		
+
 		SwingWorker<ResponseEntity<Void>, Void> worker = new SwingWorker<>() {
 			@Override
 			protected ResponseEntity<Void> doInBackground() {
