@@ -69,3 +69,4 @@ Thumbs.db
 *.pem
 .metadata
 com/src/main/resources/apks
+servidor/src/main/resources/apks
