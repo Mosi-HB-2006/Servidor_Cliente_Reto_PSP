@@ -332,12 +332,21 @@ public class SwingApplication extends JFrame {
 	}
 
 	private void modifyGame() {
+		listModel.clear();
+
+		Long id = getIdFromField();
+		if (id == null) {
+			JOptionPane.showMessageDialog(this, "Please enter a valid Game ID", "Invalid input",
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		
 		SwingWorker<ResponseEntity<Game>, Void> worker = new SwingWorker<>() {
 			@Override
 			protected ResponseEntity<Game> doInBackground() {
-				Game game = new Game();
-				game.setId(getIdFromField());
-				game.setTitle("Juego Modificado");
+				Game game = client.getGameId(id).getBody();
+				game.setTitle(game.getTitle() + " Modified");
+				
 				return client.modifyGame(game);
 			}
 
