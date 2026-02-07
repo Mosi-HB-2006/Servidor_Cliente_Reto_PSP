@@ -145,6 +145,7 @@ public class GameCreateDialog extends JDialog {
 	}
 
 	private void submit() {
+		setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
 		if (txtTitle.getText().isBlank()) {
 			JOptionPane.showMessageDialog(this, "Title is required");
 			return;

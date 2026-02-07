@@ -5,6 +5,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,10 @@ public class SwingApplication extends JFrame {
 	private final JButton btnDelete = new JButton("Delete Game");
 
 	private final JTextField txtId = new JTextField(5);
+	
+	public static final Path ROOT = Paths.get("../shared-files/client-files");
+	public static final Path APK_DIR = Paths.get("../shared-files/client-files/apks");
+	public static final Path IMAGE_DIR = Paths.get("../shared-files/client-files/images");
 
 	public SwingApplication(RestClient client) {
 		super("Cliente REST - Games");
@@ -154,34 +160,43 @@ public class SwingApplication extends JFrame {
 	}
 
 	private void loadGameApk() {
-		listModel.clear();
+	    Long id = getIdFromField();
+	    if (id == null) {
+	        JOptionPane.showMessageDialog(this, "Please enter a valid Game ID", "Invalid input",
+	                JOptionPane.WARNING_MESSAGE);
+	        return;
+	    }
 
-		Long id = getIdFromField();
-		if (id == null) {
-			JOptionPane.showMessageDialog(this, "Please enter a valid Game ID", "Invalid input",
-					JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+	    SwingWorker<Void, Void> worker = new SwingWorker<>() {
+	        @Override
+	        protected Void doInBackground() throws Exception {
+	            ResponseEntity<byte[]> response = client.getGameApk(id);
+	            byte[] apkBytes = response.getBody();
+	            
+	            if (apkBytes != null) {
+	                String filename = "game-" + id + ".apk";
+	                Path savePath = APK_DIR.resolve(filename);
+	                Files.write(savePath, apkBytes);
+	            }
+	            
+	            return null;
+	        }
 
-		SwingWorker<ResponseEntity<byte[]>, Void> worker = new SwingWorker<>() {
-			@Override
-			protected ResponseEntity<byte[]> doInBackground() {
-				return client.getGameApk(getIdFromField());
-			}
+	        @Override
+	        protected void done() {
+	            try {
+	                get();
+	                JOptionPane.showMessageDialog(SwingApplication.this,
+	                        "APK downloaded successfully to: " + APK_DIR.toAbsolutePath());
+	            } catch (Exception ex) {
+	                showError(ex);
+	            }
+	        }
+	    };
 
-			@Override
-			protected void done() {
-				try {
-					byte[] apk = get().getBody();
-					JOptionPane.showMessageDialog(SwingApplication.this,
-							"APK recibido. Tamaño: " + (apk != null ? apk.length : 0) + " bytes");
-				} catch (Exception ex) {
-					showError(ex);
-				}
-			}
-		};
-		worker.execute();
+	    worker.execute();
 	}
+
 
 	private void loadGameImage() {
 		listModel.clear();
@@ -378,6 +393,13 @@ public class SwingApplication extends JFrame {
 	public static void main(String[] args) {
 		String baseUrl = "http://localhost:8080/api/games/";
 		RestClient client = new RestClient(baseUrl);
+		
+		try {
+			Files.createDirectories(APK_DIR);
+			Files.createDirectories(IMAGE_DIR);
+		} catch (IOException e) {
+			System.out.println("Error occurred creating local files.");
+		}
 
 		EventQueue.invokeLater(() -> new SwingApplication(client).setVisible(true));
 	}
