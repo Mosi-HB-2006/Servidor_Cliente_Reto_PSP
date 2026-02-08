@@ -128,27 +128,35 @@ public class SpringController {
 
 	@PostMapping("create/")
 	public ResponseEntity<Game> createGame(@RequestPart("game") Game newGame,
-			@RequestPart("apk") MultipartFile apkFile, @RequestPart("image") MultipartFile imageFile) {
-		if (newGame == null || apkFile == null || imageFile == null) {
+			@RequestPart(value = "apk", required = false) MultipartFile apkFile, @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+		if (newGame == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
 		
-		Path apkPath = springService.APK_DIR.resolve(timestamp + "-" + newGame.getTitle() + ".apk");
-		try {
-			Files.write(apkPath, apkFile.getBytes());
-		} catch (IOException e) {
-			return ResponseEntity.internalServerError().build();
+		if(apkFile != null) {
+			Path apkPath = springService.APK_DIR.resolve(timestamp + "-" + newGame.getTitle() + ".apk");
+			try {
+				Files.write(apkPath, apkFile.getBytes());
+			} catch (IOException e) {
+				return ResponseEntity.internalServerError().build();
+			}
+			newGame.setApkPath("apks/" + timestamp + "-" + newGame.getTitle() + ".apk");
+		}else {
+			newGame.setApkPath(null);
 		}
-		newGame.setApkPath("apks/" + timestamp + "-" + newGame.getTitle() + ".apk");
 
-		Path imagePath = springService.IMAGE_DIR.resolve(timestamp + "-" + newGame.getTitle() + ".png");
-		try {
-			Files.write(imagePath, imageFile.getBytes());
-		} catch (IOException e) {
-			return ResponseEntity.internalServerError().build();
+		if(imageFile != null) {
+			Path imagePath = springService.IMAGE_DIR.resolve(timestamp + "-" + newGame.getTitle() + ".png");
+			try {
+				Files.write(imagePath, imageFile.getBytes());
+			} catch (IOException e) {
+				return ResponseEntity.internalServerError().build();
+			}
+			newGame.setImagePath("images/" + timestamp + "-" + newGame.getTitle() + ".png");
+		}else {
+			newGame.setImagePath(null);
 		}
-		newGame.setImagePath("images/" + timestamp + "-" + newGame.getTitle() + ".png");
 
 		Game createdGame = springService.createGame(newGame);
 
